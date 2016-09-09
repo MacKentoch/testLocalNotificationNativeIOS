@@ -16,30 +16,92 @@
 
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+  
+  [self registerNotification];
+  [self scheduleNotification];
+  
   // Override point for customization after application launch.
   return YES;
 }
 
-- (void)applicationWillResignActive:(UIApplication *)application {
-  // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
-  // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
+
+
+- (void)registerNotification {
+  UIUserNotificationType types =  UIUserNotificationTypeBadge |
+                                  UIUserNotificationTypeSound |
+                                  UIUserNotificationTypeAlert;
+
+  UIUserNotificationSettings *mySettings = [UIUserNotificationSettings settingsForTypes:types
+                                                                             categories:nil];
+  
+  [[UIApplication sharedApplication] registerUserNotificationSettings:mySettings];
 }
 
-- (void)applicationDidEnterBackground:(UIApplication *)application {
-  // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
-  // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
+
+-(void) scheduleNotification {
+  UILocalNotification *notification = [[UILocalNotification alloc] init];
+  
+//  notification.fireDate = [[NSDate date] dateByAddingTimeInterval:60*60*24];
+  notification.fireDate = [[NSDate date] dateByAddingTimeInterval:60];
+  notification.alertBody = @"1 minute passed then this notification came";
+  
+  [[UIApplication sharedApplication] scheduleLocalNotification:notification];
+  
+  // this will schedule the notification to fire at the fire date
+  [[UIApplication sharedApplication] scheduleLocalNotification:notification];
+  
+  // this will fire the notification right away, it will still also fire at the date we set
+//  [[UIApplication sharedApplication] presentLocalNotificationNow:notification];
 }
+
+-(void) cancelAllLocalNotifications {
+  [[UIApplication sharedApplication] cancelAllLocalNotifications];
+}
+
+
+- (void)application:(UIApplication *)application didReceiveLocalNotification:(UILocalNotification *)notification
+{
+  [self showNotificationAlert:@"hello world"
+                    withTitle:@"Test local notification"];
+}
+
+-(void)showNotificationAlert:(NSString*)message withTitle:(NSString *)title{
+  dispatch_async(dispatch_get_main_queue(), ^{
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:title
+                                                                             message:message
+                                                                      preferredStyle:UIAlertControllerStyleAlert];
+    
+    [alertController addAction:[UIAlertAction actionWithTitle:@"OK"
+                                                        style:UIAlertActionStyleDefault
+                                                      handler:^(UIAlertAction * _Nonnull action) {
+      
+    }]];
+    
+    [[[[UIApplication sharedApplication] keyWindow] rootViewController] presentViewController:alertController
+                                                                                     animated:YES completion:^{
+    }];
+  });
+}
+
 
 - (void)applicationWillEnterForeground:(UIApplication *)application {
   // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
+  // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
+  NSLog(@"%s", __PRETTY_FUNCTION__);
+  
+//  application.applicationIconBadgeNumber = 0;
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application {
   // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+  
+  // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+  NSLog(@"%s", __PRETTY_FUNCTION__);
+  
+//  application.applicationIconBadgeNumber = 0;
+  
+//  [[UIApplication sharedApplication] cancelAllLocalNotifications];
 }
 
-- (void)applicationWillTerminate:(UIApplication *)application {
-  // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
-}
 
 @end
